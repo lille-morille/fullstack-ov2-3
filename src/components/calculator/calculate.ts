@@ -1,26 +1,46 @@
-export default function calculate(input: string): Output {
-  let value = "";
-  let isValid = true;
+export default async function calculate(input: string): Promise<Output> {
   try {
-    if (input.includes("/0")) {
-      value = "DIV BY ZERO";
-      isValid = false;
+    let response = await fetch(
+      `http://localhost:8080/calculate?expression=${encodeURIComponent(input)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "x-www-form-urlencoded",
+        },
+      }
+    );
+
+    if (response.ok) {
+      const payload = (await response.json()) as Response;
+      return {
+        isValid: true,
+        value: payload.result.toString(),
+      };
+    }
+
+    if (response.status === 400) {
+      return {
+        isValid: false,
+        value: await response.text(),
+      };
     } else {
-      const result: number = eval(input);
-      value = result.toString();
+      return {
+        isValid: false,
+        value: "UNKOWN ERROR",
+      };
     }
   } catch (error) {
-    value = "ERROR";
-    isValid = false;
-  } finally {
-    return {
-      isValid,
-      value,
-    };
+    // If the response is not OK and not a 400, throw an error
+    throw new Error(`Error while sending calulcation request: ${error}`);
   }
 }
 
 interface Output {
   value: string;
   isValid: boolean;
+}
+
+export interface Response {
+  expression: string;
+  result: number;
 }

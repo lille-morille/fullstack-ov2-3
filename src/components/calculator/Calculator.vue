@@ -13,19 +13,19 @@ interface History {
 
 const history = ref<History[]>([]);
 
-function performCalculation(): void {
+async function performCalculation() {
   const mem = text.value;
-  const output = calculate(text.value);
+  const output = await calculate(text.value);
   if (output.isValid) {
-    history.value.push({ result: parseInt(output), text: mem });
+    history.value.push({ result: parseFloat(output.value), text: mem });
   }
 
   text.value = output.value;
 }
 
-function inputText(char: string): void {
+async function inputText(char: string) {
   if (char === "=") {
-    performCalculation();
+    await performCalculation();
     return;
   } else if (char === "C") {
     text.value = "";
