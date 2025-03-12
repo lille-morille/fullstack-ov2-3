@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 
 import { ref } from "vue";
 import calculate from "./calculate";
+import { saveCalculation } from "@/lib/api";
 
 const text = ref("");
 
@@ -21,6 +22,15 @@ async function performCalculation() {
   }
 
   text.value = output.value;
+
+  const jwt = localStorage.getItem("jwt");
+  if (jwt) {
+    await saveCalculation({
+      jwt,
+      expression: mem,
+      result: parseFloat(output.value),
+    });
+  }
 }
 
 async function inputText(char: string) {
